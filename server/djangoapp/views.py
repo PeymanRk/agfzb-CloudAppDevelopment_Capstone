@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
-from .restapis import get_dealers_from_cf, get_dealer_reviews_from_cf
+from .restapis import get_dealers_from_cf, get_dealer_reviews_from_cf, post_request
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
@@ -105,22 +105,37 @@ def get_dealerships(request):
         return HttpResponse(dealer_names)
         # return render(request, 'djangoapp/index.html', context)
 
-def get_dealer_details(request, dealer_id):
-    context = {}
-    if request.method == "GET":                
-        dealerships = get_dealer_reviews_from_cf(review_url, dealer_id,**args)
-        dealer_names = ' '.join([dealer.name for dealer in dealerships])
-        return HttpResponse(dealer_names)
-        # return render(request, 'djangoapp/index.html', context)
-
-
-
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
 # def get_dealer_details(request, dealer_id):
 # ...
+def get_dealer_details(request, dealer_id):
+    context = {}
+    if request.method == "GET":                
+        dealerships = get_dealer_reviews_from_cf(review_url, dealer_id,**args)        
+        dealer_names = ' '.join([dealer.sentiment for dealer in dealerships])
+        return HttpResponse(dealer_names)        
+        # return render(request, 'djangoapp/index.html', context)
 
 # Create a `add_review` view to submit a review
 # def add_review(request, dealer_id):
 # ...
+def add_review(request, dealer_id):
+    review= dict()
+    review["time"] = datetime.utcnow().isoformat()
+    review["name"] = "name"
+    review["dealership"] = 11
+    review["review"] = "This is a great car dealer"
+    review["purchase"] = "purchase"
+    review["another"] = "another"
+    review["purchase_date"] = "purchase_date"
+    review["car_make"] = "car_make"
+    review["car_model"] = "car_model"
+    review["car_year"] = "car_year"
+    json_payload = dict()
+    json_payload["review"] = review
+    new_args = args.copy()
+    new_args["dealerId"] = dealer_id
 
+    resp = post_request(review_url, json_payload, **new_args)
+    return HttpResponse(resp['message'])
