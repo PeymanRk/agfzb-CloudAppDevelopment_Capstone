@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
-# from .restapis import related methods
+from .restapis import get_dealers_from_cf, get_dealer_reviews_from_cf
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
@@ -13,7 +13,14 @@ import json
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
+dealership_url = "https://us-south.functions.appdomain.cloud/api/v1/web/6b4c87a1-fb5b-406c-b608-50383fed62a0/dealership-package/dealership"
+review_url = "https://us-south.functions.appdomain.cloud/api/v1/web/6b4c87a1-fb5b-406c-b608-50383fed62a0/dealership-package/review"
 
+args = {
+    "COUCH_URL": "https://56b90a26-c500-4d17-a692-797d5dceb66d-bluemix.cloudantnosqldb.appdomain.cloud",
+    "IAM_API_KEY": "gSeugYqaUmOWRXcsCyyeYxHCmr9wmM_BhpB0mPz2BcUH",
+    "COUCH_USERNAME": "56b90a26-c500-4d17-a692-797d5dceb66d-bluemix"
+}
 # Create your views here.
 
 
@@ -92,8 +99,21 @@ def registration_request(request):
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
     context = {}
-    if request.method == "GET":
-        return render(request, 'djangoapp/index.html', context)
+    if request.method == "GET":        
+        dealerships = get_dealers_from_cf(dealership_url, **args)        
+        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
+        return HttpResponse(dealer_names)
+        # return render(request, 'djangoapp/index.html', context)
+
+def get_dealer_details(request, dealer_id):
+    context = {}
+    if request.method == "GET":                
+        dealerships = get_dealer_reviews_from_cf(review_url, dealer_id,**args)
+        dealer_names = ' '.join([dealer.name for dealer in dealerships])
+        return HttpResponse(dealer_names)
+        # return render(request, 'djangoapp/index.html', context)
+
+
 
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
