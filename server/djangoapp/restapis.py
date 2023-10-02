@@ -94,10 +94,9 @@ def get_dealer_reviews_from_cf(url, dealerId, **kwargs):
                 car_year=doc.get("car_year", ""),
                 id=doc.get("id"),
                 sentiment="null")
-            review_obj.sentiment = analyze_review_sentiments(review_obj.review)
+            review_obj.sentiment = analyze_review_sentiments(review_obj.review)            
             results.append(review_obj)
-    return results
-    # return {'id':454}
+    return results    
 
 
 # Create an `analyze_review_sentiments` method to call Watson NLU and analyze text
@@ -105,8 +104,7 @@ def get_dealer_reviews_from_cf(url, dealerId, **kwargs):
 # - Call get_request() with specified arguments
 # - Get the returned sentiment label such as Positive or Negative
 def analyze_review_sentiments(text):    
-    url="https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/9ff4fda8-151d-4d6f-96f2-0e95cd6cb344"
-    text = "Excellent service would recommend"
+    url="https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/9ff4fda8-151d-4d6f-96f2-0e95cd6cb344"    
     authenticator = IAMAuthenticator('Y4GTm1rCp9BXV7XMFXRNpUvNYM4cQsFpdaCfCH4T0Ob8')
     natural_language_understanding = NaturalLanguageUnderstandingV1(
         version='2022-04-07',
@@ -116,8 +114,7 @@ def analyze_review_sentiments(text):
 
     response = natural_language_understanding.analyze(
         text=text,
-        features=Features(
-            # keywords=KeywordsOptions(sentiment=True)
+        features=Features(            
             sentiment=SentimentOptions(document=True)
         )).get_result()    
     return response['sentiment']['document']['label']

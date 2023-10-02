@@ -110,15 +110,14 @@ def get_dealerships(request):
 # ...
 def get_dealer_details(request, dealer_id):
     context = {}
-    if request.method == "GET":                
+    if request.method == "GET":
         reviews = get_dealer_reviews_from_cf(review_url, dealerId = dealer_id,**args)
         dealerships = get_dealers_from_cf(dealership_url, **args)
-        dealers = list(filter(lambda x: x.id == dealer_id, dealerships))
-        # dealer = {}
+        dealers = list(filter(lambda x: x.id == dealer_id, dealerships))        
         if len(dealers) == 1:
-            dealer = dealers[0]            
+            dealer = dealers[0]
         else:
-            dealer["full_name"] = "undefined"        
+            dealer["full_name"] = "undefined"          
         context = {'reviews': reviews, 'dealer': dealer}
         return render(request, 'djangoapp/dealer_details.html', context)
 
@@ -126,21 +125,33 @@ def get_dealer_details(request, dealer_id):
 # def add_review(request, dealer_id):
 # ...
 def add_review(request, dealer_id):
-    review= dict()
-    review["time"] = datetime.utcnow().isoformat()
-    review["name"] = "name"
-    review["dealership"] = 11
-    review["review"] = "This is a great car dealer"
-    review["purchase"] = "purchase"
-    review["another"] = "another"
-    review["purchase_date"] = "purchase_date"
-    review["car_make"] = "car_make"
-    review["car_model"] = "car_model"
-    review["car_year"] = "car_year"
-    json_payload = dict()
-    json_payload["review"] = review
-    new_args = args.copy()
-    new_args["dealerId"] = dealer_id
+    context = {'dealer_id': dealer_id}
+    if request.method == "GET":
+        dealerships = get_dealers_from_cf(dealership_url, **args)
+        dealers = list(filter(lambda x: x.id == dealer_id, dealerships))        
+        if len(dealers) == 1:
+            context['dealer_name'] = dealers[0].full_name
+        else:
+            context['dealer_name'] = "undefined"          
+        context['cars']={}
+        return render(request, 'djangoapp/add_review.html', context)
 
-    resp = post_request(review_url, json_payload, **new_args)
-    return HttpResponse(resp['message'])
+    elif request.method == "POST":
+        review= dict()
+        review["time"] = datetime.utcnow().isoformat()
+        review["name"] = "Me"
+        review["dealership"] = dealer_id
+        review["review"] = "Excellent service, would recomment"
+        review["purchase"] = "purchase"
+        review["another"] = "another"
+        review["purchase_date"] = "today"
+        review["car_make"] = "Maybach"
+        review["car_model"] = "new"
+        review["car_year"] = "2020"
+        json_payload = dict()
+        json_payload["review"] = review
+        new_args = args.copy()
+        new_args["dealerId"] = dealer_id
+
+        resp = post_request(review_url, json_payload, **new_args)
+        return HttpResponse(resp['message'])

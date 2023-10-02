@@ -2,7 +2,7 @@
 {% load static %} 
 
 {% block title %}Dealership Review - Dealership Details{% endblock %}
-{% block review %}<a href="{% url 'djangoapp:add_review' dealer.id %}">Add review</a>{% endblock %}
+{% block review %}<a href="{% url 'djangoapp:add_review' dealer_id=dealer.id %}">Add review</a>{% endblock %}
 
 {% block content %}
 Reviews for <h1>{{dealer.full_name}}</h1>
@@ -18,7 +18,7 @@ Reviews for <h1>{{dealer.full_name}}</h1>
         {% if review.sentiment == "neutral" %}
             <img class="card-img-left m-2" width='64px' src="{{MEDIA_URL}}/emoji/neutral.png" alt="Amber"/>
         {% endif %}
-        {% if review.thresdholf == "negative" %}
+        {% if review.sentiment == "negative" %}
             <img class="card-img-left m-2" width='64px' src="{{MEDIA_URL}}/emoji/negative.png" alt="Red"/>
         {% endif %}
         <div class="card-body">
