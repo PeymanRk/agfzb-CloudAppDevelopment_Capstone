@@ -21,6 +21,19 @@ args = {
     "IAM_API_KEY": "gSeugYqaUmOWRXcsCyyeYxHCmr9wmM_BhpB0mPz2BcUH",
     "COUCH_USERNAME": "56b90a26-c500-4d17-a692-797d5dceb66d-bluemix"
 }
+
+cars = [
+        {'id': 1, "make": "Subaru", "name": "Forester", "year": "2020"},
+        {'id': 2, "make": "BMW", "name": "i8", "year": "2019"},
+        {'id': 3, "make": "Mersedes-Benz", "name": "GLA250", "year": "2021"},
+        {'id': 4, "make": "Lamborghini", "name": "Aventador", "year": "2015"},
+        {'id': 5, "make": "Toyota", "name": "CH-R", "year": "2018"},
+        {'id': 6, "make": "Toyota", "name": "Rav4", "year": "2020"},
+        {'id': 7, "make": "Mazda", "name": "SX5", "year": "2022"},
+        {'id': 8, "make": "Hyundai", "name": "SantaFe", "year": "2020"},
+        {'id': 9, "make": "Ford", "name": "Mustang", "year": "2023"},
+        {'id': 10, "make": "Chevrolet", "name": "Camaro", "year": "2023"},
+    ]
 # Create your views here.
 
 
@@ -133,25 +146,26 @@ def add_review(request, dealer_id):
             context['dealer_name'] = dealers[0].full_name
         else:
             context['dealer_name'] = "undefined"          
-        context['cars']={}
+        context['cars']= cars
         return render(request, 'djangoapp/add_review.html', context)
 
     elif request.method == "POST":
         review= dict()
         review["time"] = datetime.utcnow().isoformat()
-        review["name"] = "Me"
+        review["name"] = request.user.username
         review["dealership"] = dealer_id
-        review["review"] = "Excellent service, would recomment"
-        review["purchase"] = "purchase"
-        review["another"] = "another"
-        review["purchase_date"] = "today"
-        review["car_make"] = "Maybach"
-        review["car_model"] = "new"
-        review["car_year"] = "2020"
+        review["review"] = request.POST["content"]
+        review["purchase"] = request.POST["purchasecheck"]
+        # review["another"] = "another"
+        review["purchase_date"] = request.POST["purchasedate"]
+        car = [x for x in cars if x['id']==int(request.POST["car"])][0]
+        review["car_make"] = car['make']
+        review["car_model"] = car['name']
+        review["car_year"] = car['year']
         json_payload = dict()
         json_payload["review"] = review
         new_args = args.copy()
         new_args["dealerId"] = dealer_id
 
         resp = post_request(review_url, json_payload, **new_args)
-        return HttpResponse(resp['message'])
+        return redirect("djangoapp:dealer_details", dealer_id=dealer_id)
