@@ -26,7 +26,7 @@ def get_request(url, api_key=None, **kwargs):
     status_code = response.status_code
     print("With status {} ".format(status_code))
     json_data = json.loads(response.text)    
-    return json_data
+    return json_data, status_code
 
 
 # Create a `post_request` to make HTTP POST requests
@@ -51,7 +51,7 @@ def post_request(url, json_payload, **kwargs):
 def get_dealers_from_cf(url, **kwargs):
     results = []
     # Call get_request with a URL parameter
-    json_result = get_request(url, **kwargs)
+    json_result, _ = get_request(url, **kwargs)
     if json_result:
         # Get the row list in JSON as dealers
         dealers = json_result
@@ -76,9 +76,12 @@ def get_dealer_reviews_from_cf(url, dealerId, **kwargs):
     results = []
     new_args = kwargs.copy()
     new_args["dealerId"] = dealerId
-    json_result = get_request(url, **new_args)
-    if json_result:        
-        for review in json_result:            
+    json_result, code = get_request(url, **new_args)    
+    if code==404:
+        print("no review")
+        return None
+    elif json_result:
+        for review in json_result:
             doc = review            
             review_obj = DealerReview(
                 dealership=doc.get("dealership", ""),
@@ -94,6 +97,7 @@ def get_dealer_reviews_from_cf(url, dealerId, **kwargs):
             review_obj.sentiment = analyze_review_sentiments(review_obj.review)
             results.append(review_obj)
     return results
+    # return {'id':454}
 
 
 # Create an `analyze_review_sentiments` method to call Watson NLU and analyze text

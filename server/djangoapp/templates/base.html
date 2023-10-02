@@ -24,18 +24,24 @@
             {% if user.is_authenticated %}
             <li>
                 <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
+                {% block review %}
+                
+                {% endblock %}
                 <a class="btn btn-link" href="{% url 'djangoapp:logout' %}">Logout</a>
             </li>
             {% else %}
-            <li>
-                <form class="form-inline" action="{% url 'djangoapp:login' %}" method="post">
-                    {% csrf_token %}
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Username" name="username" >
-                        <input type="password" class="form-control" placeholder="Password" name="psw" >
-                        <button class="btn btn-primary" type="submit">Login</button>                        
-                    </div>
-                </form>
+            <li >
+                <div class="input-group">
+                    <form class="form-inline" action="{% url 'djangoapp:login' %}" method="post">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Username" name="username" >
+                            <input type="password" class="form-control" placeholder="Password" name="psw" >
+                            <button class="btn btn-primary" type="submit">Login</button>
+                        </div>
+                    </form>
+                    <a class="btn btn-info m-1" href="{% url 'djangoapp:registration' %}" >Signup</a>
+                </div>
             </li>
             {% endif %}
         </ul>
